@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+build/
+
+# vercel
+.vercel
+
+# local machine automation scripts (contain a plaintext Vercel deploy token —
+# these are personal, machine-specific helpers and should never be pushed)
+*.command
+
+# OS / editor junk
+.DS_Store
+.vscode/
+*.log
+
+# env files (in case any get created later)
+.env
+.env.local
+.env.*.local
