@@ -317,203 +317,66 @@ function ScreenSlider({
 }
 
 /* ────────────────────────────────────────────────────────────────────
-   Hero background: a hand-drawn dashed "movement trail" that loops
-   around behind the phone, a handful of quirky fitness doodles (two
-   travel along the trail, the rest float/bob/spin in place), and a
-   few soft watercolor-style blobs that slowly breathe. Purely
-   decorative — sits behind the phone and the page copy, never in
-   front of it — and every animation backs off under
+   Hero background: a simple road running beneath the phone — the
+   phone reads as a car parked on it, with a dashed center line that
+   crawls slowly left-to-right to suggest forward motion. Purely
+   decorative — sits behind the phone, never in front of it or the
+   copy above — and the crawl is intentionally gentle so it doesn't
+   pull attention away from the screens/CTA. Backs off entirely under
    prefers-reduced-motion.
    ──────────────────────────────────────────────────────────────── */
 
-// A loose, hand-drawn loop that sweeps from lower-left, up and around
-// behind the phone, and back down to lower-right — reused both as the
-// visible dashed path and as the motion path the traveling doodles ride.
-const TRAIL_PATH_D =
-  "M 34 522 C 6 430 26 328 96 274 C 150 232 132 156 196 118 C 252 84 318 96 296 156 C 278 204 336 236 388 206 C 446 172 492 226 468 288 C 448 338 494 372 486 428 C 480 470 500 500 486 522";
-
-function DoodleSneaker({ size = 34 }: { size?: number }) {
-  return (
-    <svg width={size} height={size * 0.68} viewBox="0 0 48 32" fill="none">
-      <path
-        d="M4 24 Q4 15 13 12 L21 6 Q25 3 29 7 L33 13 L44 16 Q47 18 45 22 L45 26 Q45 28 43 28 L8 28 Q4 28 4 24 Z"
-        fill={ORANGE}
-        stroke={CHARCOAL}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <path d="M14 12 L13 22 M21 8 L21 22 M28 8.5 L29 22" stroke={CHARCOAL} strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function DoodleBolt({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size * 1.28} viewBox="0 0 26 34" fill="none">
-      <path
-        d="M16 2 L6 18 L13 18 L10 32 L22 14 L15 14 Z"
-        fill={YELLOW}
-        stroke={CHARCOAL}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function DoodleHeart({ size = 28 }: { size?: number }) {
-  return (
-    <svg width={size} height={size * 0.93} viewBox="0 0 32 30" fill="none">
-      <path
-        d="M16 27 C3 18 1 9 7.5 5.3 C11.5 3 16 5 16 10.5 C16 5 20.5 3 24.5 5.3 C31 9 29 18 16 27 Z"
-        fill={PINK}
-        stroke={CHARCOAL}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DoodleBottle({ size = 24 }: { size?: number }) {
-  return (
-    <svg width={size} height={size * 1.4} viewBox="0 0 26 36" fill="none">
-      <rect x="4" y="3" width="8" height="6" rx="1.6" fill={BLUE} stroke={CHARCOAL} strokeWidth="2" />
-      <path
-        d="M5 9 L4 15 Q3 18 5 20 L5 31 Q5 34 8 34 L11 34 Q14 34 14 31 L14 20 Q16 18 15 15 L14 9 Z"
-        fill={BLUE}
-        stroke={CHARCOAL}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-      <line x1="4.5" y1="22" x2="14" y2="22" stroke={CHARCOAL} strokeWidth="1.4" />
-    </svg>
-  );
-}
-
-function DoodleStar({ size = 26 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-      <path
-        d="M16 2 L19.8 12.2 L30 12.6 L21.8 19 L24.8 29 L16 23 L7.2 29 L10.2 19 L2 12.6 L12.2 12.2 Z"
-        fill={PURPLE}
-        stroke={CHARCOAL}
-        strokeWidth="2.2"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DoodleSmiley({ size = 30 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none">
-      <circle cx="16" cy="16" r="13" fill={GREEN} stroke={CHARCOAL} strokeWidth="2.2" />
-      <circle cx="11.2" cy="13.5" r="1.7" fill={CHARCOAL} />
-      <circle cx="20.8" cy="13.5" r="1.7" fill={CHARCOAL} />
-      <path d="M9.5 19 Q16 25 22.5 19" stroke={CHARCOAL} strokeWidth="2.1" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function HeroDoodleBackground() {
+function HeroRoadBackground({ maxWidth = 320 }: { maxWidth?: number }) {
+  const roadWidth = Math.round(maxWidth * 1.4);
   return (
     <div
       aria-hidden="true"
-      className="fp-hero-bg absolute pointer-events-none"
+      className="fp-hero-road absolute pointer-events-none"
       style={{
-        top: "-3%",
+        bottom: 40,
         left: "50%",
         transform: "translateX(-50%)",
-        width: "min(560px, 96vw)",
-        height: "106%",
+        width: `min(${roadWidth}px, 92vw)`,
         zIndex: 0,
-        overflow: "hidden",
       }}
     >
       <style>{`
-        @keyframes fp-dash-flow { to { stroke-dashoffset: -190; } }
-        @keyframes fp-breathe-1 { 0%, 100% { transform: scale(1); opacity: 0.16; } 50% { transform: scale(1.09); opacity: 0.24; } }
-        @keyframes fp-breathe-2 { 0%, 100% { transform: scale(1.05); opacity: 0.14; } 50% { transform: scale(0.95); opacity: 0.22; } }
-        @keyframes fp-float-a { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-9px) rotate(5deg); } }
-        @keyframes fp-float-b { 0%, 100% { transform: translateY(0) rotate(4deg); } 50% { transform: translateY(10px) rotate(-4deg); } }
-        @keyframes fp-bob-spin { 0%, 100% { transform: translateY(0) rotate(-7deg); } 50% { transform: translateY(-6px) rotate(7deg); } }
-        @keyframes fp-travel { to { offset-distance: 100%; } }
-
-        .fp-hero-bg .fp-dash { animation: fp-dash-flow 7s linear infinite; }
-        .fp-hero-bg .fp-blob-1 { transform-origin: 92px 130px; animation: fp-breathe-1 11s ease-in-out infinite; }
-        .fp-hero-bg .fp-blob-2 { transform-origin: 430px 110px; animation: fp-breathe-2 13s ease-in-out infinite; animation-delay: -3s; }
-        .fp-hero-bg .fp-blob-3 { transform-origin: 70px 480px; animation: fp-breathe-1 12s ease-in-out infinite; animation-delay: -6s; }
-        .fp-hero-bg .fp-blob-4 { transform-origin: 450px 470px; animation: fp-breathe-2 10s ease-in-out infinite; animation-delay: -2s; }
-        .fp-hero-bg .fp-blob-5 { transform-origin: 260px 40px; animation: fp-breathe-1 14s ease-in-out infinite; animation-delay: -8s; }
-        .fp-hero-bg .fp-blob-6 { transform-origin: 260px 590px; animation: fp-breathe-2 12.5s ease-in-out infinite; animation-delay: -5s; }
-        .fp-hero-bg .fp-doodle-float-a { transform-origin: center; animation: fp-float-a 6.5s ease-in-out infinite; }
-        .fp-hero-bg .fp-doodle-float-b { transform-origin: center; animation: fp-float-b 7.5s ease-in-out infinite; animation-delay: -2s; }
-        .fp-hero-bg .fp-doodle-bob { transform-origin: center; animation: fp-bob-spin 8s ease-in-out infinite; animation-delay: -4s; }
-        .fp-hero-bg .fp-travel-1 { offset-path: path("${TRAIL_PATH_D}"); offset-rotate: 0deg; offset-distance: 0%; animation: fp-travel 17s linear infinite; }
-        .fp-hero-bg .fp-travel-2 { offset-path: path("${TRAIL_PATH_D}"); offset-rotate: 0deg; offset-distance: 48%; animation: fp-travel 17s linear infinite; animation-delay: -8.5s; }
-
+        @keyframes fp-road-scroll {
+          from { background-position-x: 0px; }
+          to { background-position-x: -68px; }
+        }
+        .fp-hero-road .fp-road-dashes { animation: fp-road-scroll 6s linear infinite; }
         @media (prefers-reduced-motion: reduce) {
-          .fp-hero-bg .fp-dash,
-          .fp-hero-bg .fp-blob-1, .fp-hero-bg .fp-blob-2, .fp-hero-bg .fp-blob-3,
-          .fp-hero-bg .fp-blob-4, .fp-hero-bg .fp-blob-5, .fp-hero-bg .fp-blob-6,
-          .fp-hero-bg .fp-doodle-float-a, .fp-hero-bg .fp-doodle-float-b, .fp-hero-bg .fp-doodle-bob,
-          .fp-hero-bg .fp-travel-1, .fp-hero-bg .fp-travel-2 {
-            animation: none !important;
-          }
+          .fp-hero-road .fp-road-dashes { animation: none !important; }
         }
       `}</style>
 
-      <svg viewBox="0 0 520 640" width="100%" height="100%" style={{ display: "block" }}>
-        {/* watercolor-style breathing blobs, one per palette color */}
-        <g style={{ filter: "blur(13px)" }}>
-          <ellipse className="fp-blob-1" cx="92" cy="130" rx="66" ry="52" fill={PINK} opacity="0.16" />
-          <ellipse className="fp-blob-2" cx="430" cy="110" rx="58" ry="60" fill={BLUE} opacity="0.14" />
-          <ellipse className="fp-blob-3" cx="70" cy="480" rx="62" ry="50" fill={YELLOW} opacity="0.18" />
-          <ellipse className="fp-blob-4" cx="450" cy="470" rx="60" ry="56" fill={GREEN} opacity="0.15" />
-          <ellipse className="fp-blob-5" cx="260" cy="40" rx="72" ry="34" fill={ORANGE} opacity="0.13" />
-          <ellipse className="fp-blob-6" cx="260" cy="600" rx="76" ry="34" fill={PURPLE} opacity="0.14" />
-        </g>
-
-        {/* hand-drawn dashed movement trail */}
-        <path
-          className="fp-dash"
-          d={TRAIL_PATH_D}
-          fill="none"
-          stroke={CHARCOAL}
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeDasharray="2 15"
-          opacity="0.32"
+      {/* road surface */}
+      <div
+        style={{
+          position: "relative",
+          height: 40,
+          borderRadius: 999,
+          backgroundColor: CHARCOAL,
+          border: `2.5px solid ${CHARCOAL}`,
+          boxShadow: "5px 5px 0 rgba(37,37,37,0.16)",
+          overflow: "hidden",
+        }}
+      >
+        {/* scrolling dashed center line */}
+        <div
+          className="fp-road-dashes"
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: 0,
+            width: "100%",
+            height: 5,
+            transform: "translateY(-50%)",
+            backgroundImage: `repeating-linear-gradient(90deg, ${CREAM} 0px, ${CREAM} 24px, transparent 24px, transparent 68px)`,
+          }}
         />
-
-        {/* doodles that softly float / bob / rotate in place */}
-        <g className="fp-doodle-float-a" transform="translate(26, 246)">
-          <DoodleHeart size={32} />
-        </g>
-        <g className="fp-doodle-float-b" transform="translate(448, 234)">
-          <DoodleStar size={30} />
-        </g>
-        <g className="fp-doodle-bob" transform="translate(24, 584)">
-          <DoodleBottle size={28} />
-        </g>
-        <g className="fp-doodle-float-a" transform="translate(450, 552)" style={{ animationDelay: "-3s" }}>
-          <DoodleSmiley size={32} />
-        </g>
-
-        {/* doodles that travel along the dashed trail */}
-        <g className="fp-travel-1">
-          <g transform="translate(-19, -13)">
-            <DoodleSneaker size={38} />
-          </g>
-        </g>
-        <g className="fp-travel-2">
-          <g transform="translate(-13, -18)">
-            <DoodleBolt size={26} />
-          </g>
-        </g>
-      </svg>
+      </div>
     </div>
   );
 }
@@ -661,7 +524,7 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
 
         {/* Hero: the actual UI, cycling through the flow */}
         <div className="relative flex justify-center">
-          <HeroDoodleBackground />
+          <HeroRoadBackground maxWidth={320} />
           <div className="relative" style={{ zIndex: 1 }}>
             <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={320} />
           </div>
