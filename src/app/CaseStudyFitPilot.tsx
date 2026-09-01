@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import dashboardImg from "@/imports/fitpilot/fitpilot-dashboard.png";
 import welcomeImg from "@/imports/fitpilot/fitpilot-welcome.png";
 import goalImg from "@/imports/fitpilot/fitpilot-onboarding-goal.png";
@@ -138,30 +138,95 @@ function PersonaCard({
   );
 }
 
-function ScreenFrame({
-  img,
-  alt,
-  bg,
+type Screen = { img: string; alt: string };
+
+/**
+ * A single phone-shaped frame that cycles through a set of real UI
+ * screens with an Instagram-story-style slide transition — one screen
+ * slides out as the next slides in. No colored mat, no padding gap
+ * around the screen; the frame hugs the screenshot exactly, so the
+ * page's own background shows through (nothing extra behind it).
+ */
+function ScreenSlider({
+  screens,
+  maxWidth = 300,
+  interval = 2600,
 }: {
-  img: string;
-  alt: string;
-  bg: string;
+  screens: Screen[];
+  maxWidth?: number;
+  interval?: number;
 }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (screens.length <= 1) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % screens.length);
+    }, interval);
+    return () => clearInterval(id);
+  }, [screens.length, interval]);
+
   return (
-    <div
-      className="rounded-2xl p-4 flex items-center justify-center"
-      style={{ backgroundColor: bg }}
-    >
-      <img
-        src={img}
-        alt={alt}
-        loading="lazy"
-        className="w-full h-auto rounded-xl"
-        style={{ maxWidth: 260 }}
-      />
+    <div className="flex flex-col items-center gap-4">
+      <div
+        className="relative overflow-hidden rounded-[1.75rem] border-2 w-full"
+        style={{
+          maxWidth,
+          borderColor: CHARCOAL,
+          aspectRatio: "9 / 19.6",
+          boxShadow: "7px 7px 0 rgba(37,37,37,1)",
+        }}
+      >
+        <div
+          className="flex h-full"
+          style={{
+            width: `${screens.length * 100}%`,
+            transform: `translateX(-${index * (100 / screens.length)}%)`,
+            transition: "transform 600ms cubic-bezier(0.65,0,0.35,1)",
+          }}
+        >
+          {screens.map((s, i) => (
+            <img
+              key={s.img}
+              src={s.img}
+              alt={s.alt}
+              loading={i === 0 ? "eager" : "lazy"}
+              className="h-full object-cover object-top shrink-0"
+              style={{ width: `${100 / screens.length}%` }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {screens.length > 1 && (
+        <div className="flex items-center gap-2">
+          {screens.map((s, i) => (
+            <button
+              key={s.img}
+              type="button"
+              onClick={() => setIndex(i)}
+              aria-label={`Show ${s.alt}`}
+              className="rounded-full transition-all"
+              style={{
+                width: i === index ? 22 : 7,
+                height: 7,
+                backgroundColor: i === index ? CHARCOAL : "rgba(37,37,37,0.25)",
+              }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+const FITPILOT_SCREENS: Screen[] = [
+  { img: welcomeImg, alt: "FitPilot welcome screen — Fitness that fits your life" },
+  { img: overviewImg, alt: "FitPilot onboarding intro — Let's build your plan" },
+  { img: goalImg, alt: "FitPilot onboarding — What's your main goal card selection" },
+  { img: planReadyImg, alt: "FitPilot plan ready confirmation screen" },
+  { img: dashboardImg, alt: "FitPilot dashboard — today's workout, mood check-in, streaks, and AI coach" },
+];
 
 function TaskRow({
   task,
@@ -265,18 +330,9 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
           <FactCard label="Type" value="Bootcamp project" bg={ORANGE} fg="#ffffff" />
         </div>
 
-        {/* Zoom-in hero image */}
-        <div
-          className="rounded-3xl p-6 md:p-10 flex justify-center"
-          style={{ backgroundColor: PURPLE }}
-        >
-          <img
-            src={dashboardImg}
-            alt="FitPilot dashboard screen — today's workout, mood check-in, streaks, and AI coach"
-            loading="eager"
-            className="w-full h-auto rounded-2xl border-2"
-            style={{ maxWidth: 340, borderColor: CHARCOAL }}
-          />
+        {/* Hero: the actual UI, cycling through the flow */}
+        <div className="flex justify-center">
+          <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={320} />
         </div>
       </header>
 
@@ -526,15 +582,11 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
         <h3 className="font-bold text-xl mb-5" style={{ fontFamily: "Georgia, serif" }}>
           Wireframes → final screens
         </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-5">
-          <ScreenFrame img={welcomeImg} alt="FitPilot welcome screen — Fitness that fits your life" bg={PURPLE} />
-          <ScreenFrame img={goalImg} alt="FitPilot onboarding — What's your main goal card selection" bg={YELLOW} />
-          <ScreenFrame img={overviewImg} alt="FitPilot onboarding intro — Let's build your plan" bg={PINK} />
-          <ScreenFrame img={planReadyImg} alt="FitPilot plan ready confirmation screen" bg={GREEN} />
-          <ScreenFrame img={dashboardImg} alt="FitPilot dashboard with today's workout and streaks" bg={BLUE} />
+        <div className="flex justify-center">
+          <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={240} interval={2200} />
         </div>
 
-        <p className="text-base leading-relaxed max-w-3xl mt-8" style={{ color: "rgba(37,37,37,0.7)" }}>
+        <p className="text-base leading-relaxed max-w-3xl mt-10" style={{ color: "rgba(37,37,37,0.7)" }}>
           Early wireframes used a plain vertical list with radio-button-style
           selection for the onboarding questions. That evolved into the final
           pattern above: a grid of large, tappable cards with icons and
