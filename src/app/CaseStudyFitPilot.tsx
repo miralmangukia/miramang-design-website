@@ -13,7 +13,6 @@ import q1GoalSelectedImg from "@/imports/fitpilot/fitpilot-q1-goal-selected.png"
 import q2TimeSelectedImg from "@/imports/fitpilot/fitpilot-q2-time-selected.png";
 import q3ExperienceSelectedImg from "@/imports/fitpilot/fitpilot-q3-experience-selected.png";
 import q4DaysSelectedImg from "@/imports/fitpilot/fitpilot-q4-days-selected.png";
-import trackBgImg from "@/imports/fitpilot/fitpilot-track-bg.png";
 
 const CREAM = "#F7F2E8";
 const CHARCOAL = "#252525";
@@ -317,51 +316,6 @@ function ScreenSlider({
   );
 }
 
-/* ────────────────────────────────────────────────────────────────────
-   Hero background: the running-track illustration, softened and
-   feathered into the cream page so it never reads as a hard-edged box
-   — just a warm, gently drifting backdrop behind the phone. Pans
-   slowly left-to-right (one seamless loop of the tile width). Purely
-   decorative — sits behind the phone/copy — and backs off entirely
-   under prefers-reduced-motion.
-   ──────────────────────────────────────────────────────────────── */
-
-function HeroTrackBackground() {
-  return (
-    <div
-      aria-hidden="true"
-      className="fp-hero-track absolute inset-0 pointer-events-none overflow-hidden"
-      style={{ zIndex: 0 }}
-    >
-      <style>{`
-        @keyframes fp-track-pan {
-          from { background-position-x: -760px; }
-          to { background-position-x: 0px; }
-        }
-        .fp-hero-track .fp-track-layer { animation: fp-track-pan 30s linear infinite; }
-        @media (prefers-reduced-motion: reduce) {
-          .fp-hero-track .fp-track-layer { animation: none !important; }
-        }
-      `}</style>
-      <div
-        className="fp-track-layer absolute inset-0"
-        style={{
-          backgroundImage: `url(${trackBgImg})`,
-          backgroundRepeat: "repeat-x",
-          backgroundSize: "760px auto",
-          backgroundPosition: "left bottom",
-          filter: "blur(5px)",
-          opacity: 0.58,
-          WebkitMaskImage:
-            "radial-gradient(ellipse 78% 82% at 50% 55%, black 42%, transparent 90%)",
-          maskImage:
-            "radial-gradient(ellipse 78% 82% at 50% 55%, black 42%, transparent 90%)",
-        }}
-      />
-    </div>
-  );
-}
-
 const FITPILOT_SCREENS: Screen[] = [
   { kind: "static", img: welcomeImg, alt: "FitPilot welcome screen — Fitness that fits your life" },
   { kind: "static", img: overviewImg, alt: "FitPilot onboarding intro — Let's build your plan" },
@@ -504,11 +458,8 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Hero: the actual UI, cycling through the flow */}
-        <div className="relative w-full overflow-hidden" style={{ paddingTop: 20, paddingBottom: 20 }}>
-          <HeroTrackBackground />
-          <div className="relative flex justify-center" style={{ zIndex: 1 }}>
-            <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={320} />
-          </div>
+        <div className="flex justify-center">
+          <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={320} />
         </div>
       </header>
 
