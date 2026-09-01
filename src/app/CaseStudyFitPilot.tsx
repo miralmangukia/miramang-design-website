@@ -6,6 +6,13 @@ import planReadyImg from "@/imports/fitpilot/fitpilot-plan-ready.png";
 import overviewImg from "@/imports/fitpilot/fitpilot-overview.png";
 import personaAbhishekImg from "@/imports/fitpilot/persona-abhishek.png";
 import personaGoralImg from "@/imports/fitpilot/persona-goral.png";
+import q2TimeEmptyImg from "@/imports/fitpilot/fitpilot-q2-time-empty.png";
+import q3ExperienceEmptyImg from "@/imports/fitpilot/fitpilot-q3-experience-empty.png";
+import q4DaysEmptyImg from "@/imports/fitpilot/fitpilot-q4-days-empty.png";
+import q1GoalSelectedImg from "@/imports/fitpilot/fitpilot-q1-goal-selected.png";
+import q2TimeSelectedImg from "@/imports/fitpilot/fitpilot-q2-time-selected.png";
+import q3ExperienceSelectedImg from "@/imports/fitpilot/fitpilot-q3-experience-selected.png";
+import q4DaysSelectedImg from "@/imports/fitpilot/fitpilot-q4-days-selected.png";
 
 const CREAM = "#F7F2E8";
 const CHARCOAL = "#252525";
@@ -138,63 +145,152 @@ function PersonaCard({
   );
 }
 
-type Screen = { img: string; alt: string };
+type Screen =
+  | { kind: "static"; img: string; alt: string; dwell?: number }
+  | {
+      kind: "interactive";
+      before: string;
+      after: string;
+      alt: string;
+      dwell?: number;
+      tapAt?: number;
+    };
 
 /**
- * A single phone-shaped frame that cycles through a set of real UI
- * screens with an Instagram-story-style slide transition — one screen
- * slides out as the next slides in. No colored mat, no padding gap
- * around the screen; the frame hugs the screenshot exactly, so the
- * page's own background shows through (nothing extra behind it).
+ * A phone-shaped frame — dark bezel, a Dynamic-Island-style notch, and
+ * side buttons, so it actually reads as a phone rather than a rounded
+ * rectangle — that cycles through real UI screens with an
+ * Instagram-story-style slide transition. "Interactive" screens (the
+ * onboarding questions) pause, then visibly tap 2–3 answer cards into
+ * their selected state before sliding on, mimicking someone actually
+ * using the app.
  */
 function ScreenSlider({
   screens,
   maxWidth = 300,
-  interval = 2600,
+  defaultDwell = 2400,
 }: {
   screens: Screen[];
   maxWidth?: number;
-  interval?: number;
+  defaultDwell?: number;
 }) {
   const [index, setIndex] = useState(0);
+  const [tapped, setTapped] = useState(false);
 
   useEffect(() => {
-    if (screens.length <= 1) return;
-    const id = setInterval(() => {
-      setIndex((i) => (i + 1) % screens.length);
-    }, interval);
-    return () => clearInterval(id);
-  }, [screens.length, interval]);
+    if (screens.length === 0) return;
+    setTapped(false);
+    const current = screens[index];
+    const dwell = current.dwell ?? defaultDwell;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    if (current.kind === "interactive") {
+      const tapAt = current.tapAt ?? Math.round(dwell * 0.42);
+      timers.push(setTimeout(() => setTapped(true), tapAt));
+    }
+    if (screens.length > 1) {
+      timers.push(
+        setTimeout(() => {
+          setIndex((i) => (i + 1) % screens.length);
+        }, dwell)
+      );
+    }
+    return () => timers.forEach(clearTimeout);
+  }, [index, screens, defaultDwell]);
+
+  const bezel = Math.round(maxWidth * 0.035);
+  const outerRadius = Math.round(maxWidth * 0.155);
+  const screenRadius = Math.round(maxWidth * 0.12);
 
   return (
     <div className="flex flex-col items-center gap-4">
       <div
-        className="relative overflow-hidden rounded-[1.75rem] border-2 w-full"
+        className="relative w-full"
         style={{
           maxWidth,
-          borderColor: CHARCOAL,
-          aspectRatio: "9 / 19.6",
-          boxShadow: "7px 7px 0 rgba(37,37,37,1)",
+          borderRadius: outerRadius,
+          backgroundColor: CHARCOAL,
+          padding: bezel,
+          boxShadow: "7px 7px 0 rgba(37,37,37,0.35)",
         }}
       >
+        {/* side buttons */}
+        <span
+          className="absolute rounded-sm"
+          style={{ left: -3, top: "16%", width: 3, height: "5.5%", backgroundColor: CHARCOAL }}
+        />
+        <span
+          className="absolute rounded-sm"
+          style={{ left: -3, top: "24%", width: 3, height: "9%", backgroundColor: CHARCOAL }}
+        />
+        <span
+          className="absolute rounded-sm"
+          style={{ right: -3, top: "20%", width: 3, height: "11%", backgroundColor: CHARCOAL }}
+        />
+
+        {/* screen viewport */}
         <div
-          className="flex h-full"
+          className="relative overflow-hidden w-full"
           style={{
-            width: `${screens.length * 100}%`,
-            transform: `translateX(-${index * (100 / screens.length)}%)`,
-            transition: "transform 600ms cubic-bezier(0.65,0,0.35,1)",
+            borderRadius: screenRadius,
+            aspectRatio: "9 / 19.5",
+            backgroundColor: "#ffffff",
           }}
         >
-          {screens.map((s, i) => (
-            <img
-              key={s.img}
-              src={s.img}
-              alt={s.alt}
-              loading={i === 0 ? "eager" : "lazy"}
-              className="h-full object-cover object-top shrink-0"
-              style={{ width: `${100 / screens.length}%` }}
-            />
-          ))}
+          <div
+            className="flex h-full"
+            style={{
+              width: `${screens.length * 100}%`,
+              transform: `translateX(-${index * (100 / screens.length)}%)`,
+              transition: "transform 600ms cubic-bezier(0.65,0,0.35,1)",
+            }}
+          >
+            {screens.map((s, i) => (
+              <div key={i} className="relative h-full shrink-0" style={{ width: `${100 / screens.length}%` }}>
+                {s.kind === "static" ? (
+                  <img
+                    src={s.img}
+                    alt={s.alt}
+                    loading={i === 0 ? "eager" : "lazy"}
+                    className="h-full w-full object-cover object-top"
+                  />
+                ) : (
+                  <>
+                    <img
+                      src={s.before}
+                      alt={s.alt}
+                      loading={i === 0 ? "eager" : "lazy"}
+                      className="h-full w-full object-cover object-top"
+                    />
+                    <img
+                      src={s.after}
+                      alt=""
+                      aria-hidden="true"
+                      className="absolute inset-0 h-full w-full object-cover object-top"
+                      style={{
+                        opacity: i === index && tapped ? 1 : 0,
+                        transition: "opacity 380ms ease",
+                      }}
+                    />
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* dynamic island — one consistent notch drawn over every screen */}
+          <div
+            className="absolute rounded-full"
+            style={{
+              top: "1.8%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "28%",
+              height: "3.4%",
+              backgroundColor: "#000",
+              zIndex: 10,
+            }}
+          />
         </div>
       </div>
 
@@ -202,7 +298,7 @@ function ScreenSlider({
         <div className="flex items-center gap-2">
           {screens.map((s, i) => (
             <button
-              key={s.img}
+              key={i}
               type="button"
               onClick={() => setIndex(i)}
               aria-label={`Show ${s.alt}`}
@@ -221,11 +317,42 @@ function ScreenSlider({
 }
 
 const FITPILOT_SCREENS: Screen[] = [
-  { img: welcomeImg, alt: "FitPilot welcome screen — Fitness that fits your life" },
-  { img: overviewImg, alt: "FitPilot onboarding intro — Let's build your plan" },
-  { img: goalImg, alt: "FitPilot onboarding — What's your main goal card selection" },
-  { img: planReadyImg, alt: "FitPilot plan ready confirmation screen" },
-  { img: dashboardImg, alt: "FitPilot dashboard — today's workout, mood check-in, streaks, and AI coach" },
+  { kind: "static", img: welcomeImg, alt: "FitPilot welcome screen — Fitness that fits your life" },
+  { kind: "static", img: overviewImg, alt: "FitPilot onboarding intro — Let's build your plan" },
+  {
+    kind: "interactive",
+    before: goalImg,
+    after: q1GoalSelectedImg,
+    alt: "FitPilot onboarding — tapping 'What's your main goal' cards",
+    dwell: 3400,
+    tapAt: 1200,
+  },
+  {
+    kind: "interactive",
+    before: q2TimeEmptyImg,
+    after: q2TimeSelectedImg,
+    alt: "FitPilot onboarding — tapping 'How much time can you commit' cards",
+    dwell: 3400,
+    tapAt: 1200,
+  },
+  {
+    kind: "interactive",
+    before: q3ExperienceEmptyImg,
+    after: q3ExperienceSelectedImg,
+    alt: "FitPilot onboarding — selecting an experience level",
+    dwell: 3400,
+    tapAt: 1200,
+  },
+  {
+    kind: "interactive",
+    before: q4DaysEmptyImg,
+    after: q4DaysSelectedImg,
+    alt: "FitPilot onboarding — tapping 'days per week' cards",
+    dwell: 3400,
+    tapAt: 1200,
+  },
+  { kind: "static", img: planReadyImg, alt: "FitPilot plan ready confirmation screen" },
+  { kind: "static", img: dashboardImg, alt: "FitPilot dashboard — today's workout, mood check-in, streaks, and AI coach" },
 ];
 
 function TaskRow({
@@ -583,7 +710,7 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
           Wireframes → final screens
         </h3>
         <div className="flex justify-center">
-          <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={240} interval={2200} />
+          <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={240} defaultDwell={2000} />
         </div>
 
         <p className="text-base leading-relaxed max-w-3xl mt-10" style={{ color: "rgba(37,37,37,0.7)" }}>
