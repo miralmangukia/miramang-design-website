@@ -731,15 +731,32 @@ export default function App() {
           </div>
 
           <div className="flex justify-center gap-8 mt-12">
-            {["LinkedIn", "Dribbble", "Read.cv"].map((s) => (
-              <button
-                key={s}
-                className="text-sm font-bold tracking-wide underline underline-offset-4 transition-opacity hover:opacity-50"
-                style={{ color: CHARCOAL }}
-              >
-                {s}
-              </button>
-            ))}
+            {[
+              { label: "LinkedIn", href: "https://www.linkedin.com/in/miral-mangukia-082928197" },
+              { label: "Dribbble" },
+              { label: "Read.cv" },
+            ].map(({ label, href }) =>
+              href ? (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-bold tracking-wide underline underline-offset-4 transition-opacity hover:opacity-50"
+                  style={{ color: CHARCOAL }}
+                >
+                  {label}
+                </a>
+              ) : (
+                <button
+                  key={label}
+                  className="text-sm font-bold tracking-wide underline underline-offset-4 transition-opacity hover:opacity-50"
+                  style={{ color: CHARCOAL }}
+                >
+                  {label}
+                </button>
+              )
+            )}
           </div>
         </div>
       </section>
