@@ -316,71 +316,6 @@ function ScreenSlider({
   );
 }
 
-/* ────────────────────────────────────────────────────────────────────
-   Hero background: a simple road running beneath the phone — the
-   phone reads as a car parked on it, with a dashed center line that
-   crawls slowly left-to-right to suggest forward motion. Purely
-   decorative — sits behind the phone, never in front of it or the
-   copy above — and the crawl is intentionally gentle so it doesn't
-   pull attention away from the screens/CTA. Backs off entirely under
-   prefers-reduced-motion.
-   ──────────────────────────────────────────────────────────────── */
-
-function HeroRoadBackground({ maxWidth = 320 }: { maxWidth?: number }) {
-  const roadWidth = Math.round(maxWidth * 1.4);
-  return (
-    <div
-      aria-hidden="true"
-      className="fp-hero-road absolute pointer-events-none"
-      style={{
-        bottom: 40,
-        left: "50%",
-        transform: "translateX(-50%)",
-        width: `min(${roadWidth}px, 92vw)`,
-        zIndex: 0,
-      }}
-    >
-      <style>{`
-        @keyframes fp-road-scroll {
-          from { background-position-x: 0px; }
-          to { background-position-x: -68px; }
-        }
-        .fp-hero-road .fp-road-dashes { animation: fp-road-scroll 6s linear infinite; }
-        @media (prefers-reduced-motion: reduce) {
-          .fp-hero-road .fp-road-dashes { animation: none !important; }
-        }
-      `}</style>
-
-      {/* road surface */}
-      <div
-        style={{
-          position: "relative",
-          height: 40,
-          borderRadius: 999,
-          backgroundColor: CHARCOAL,
-          border: `2.5px solid ${CHARCOAL}`,
-          boxShadow: "5px 5px 0 rgba(37,37,37,0.16)",
-          overflow: "hidden",
-        }}
-      >
-        {/* scrolling dashed center line */}
-        <div
-          className="fp-road-dashes"
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: 0,
-            width: "100%",
-            height: 5,
-            transform: "translateY(-50%)",
-            backgroundImage: `repeating-linear-gradient(90deg, ${CREAM} 0px, ${CREAM} 24px, transparent 24px, transparent 68px)`,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
 const FITPILOT_SCREENS: Screen[] = [
   { kind: "static", img: welcomeImg, alt: "FitPilot welcome screen — Fitness that fits your life" },
   { kind: "static", img: overviewImg, alt: "FitPilot onboarding intro — Let's build your plan" },
@@ -523,11 +458,8 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Hero: the actual UI, cycling through the flow */}
-        <div className="relative flex justify-center">
-          <HeroRoadBackground maxWidth={320} />
-          <div className="relative" style={{ zIndex: 1 }}>
-            <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={320} />
-          </div>
+        <div className="flex justify-center">
+          <ScreenSlider screens={FITPILOT_SCREENS} maxWidth={320} />
         </div>
       </header>
 
@@ -932,7 +864,7 @@ export default function CaseStudyFitPilot({ onBack }: { onBack: () => void }) {
 
       <footer className="py-7 border-t text-center" style={{ borderColor: "rgba(37,37,37,0.1)" }}>
         <p className="text-sm" style={{ color: "rgba(37,37,37,0.45)" }}>
-          © 2025 Miral Mangukia — Designed with too much coffee and not enough sleep.
+          © {new Date().getFullYear()} Miral Mangukia — Designed with too much coffee and not enough sleep.
         </p>
       </footer>
     </div>

@@ -750,7 +750,7 @@ export default function App() {
         style={{ borderColor: "rgba(37,37,37,0.1)" }}
       >
         <p className="text-sm" style={{ color: "rgba(37,37,37,0.45)" }}>
-          © 2025 Miral Mangukia — Designed with too much coffee and not enough sleep.
+          © {new Date().getFullYear()} Miral Mangukia — Designed with too much coffee and not enough sleep.
         </p>
       </footer>
     </div>
