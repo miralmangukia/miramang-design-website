@@ -37,7 +37,7 @@ const LOGO_TEXT_SIZE = 16;
 // More negative = pulled further UP the page. 0 = no vertical shift.
 // Tuned so the character's feet line up with the bottom of the
 // "See My Work" / "Let's Chat" buttons.
-const HERO_CHARACTER_OFFSET_Y = -136;
+const HERO_CHARACTER_OFFSET_Y = -116;
 // Left/right breathing room around the character illustration.
 const HERO_CHARACTER_SIDE_MARGIN = 50;
 // Max width of the character illustration (in pixels).
