@@ -134,8 +134,34 @@ function WavyButton({
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const w = fixedWidth ?? el.offsetWidth;
-    if (w > 0) setDim({ w, path: buildWavyPath(w) });
+
+    if (fixedWidth) {
+      setDim({ w: fixedWidth, path: buildWavyPath(fixedWidth) });
+      return;
+    }
+
+    // Re-measure whenever the button's own box size changes — not just
+    // once on mount. The button hugs its text via inline-flex + padding,
+    // so its width shifts slightly once the custom webfont finishes
+    // loading (it swaps in after a fallback-font first paint). Without
+    // this, the wavy SVG background gets baked to the fallback-font
+    // width and the real text can spill past its edge. A ResizeObserver
+    // keeps the wavy shape glued to the actual rendered width no matter
+    // what causes the reflow (font swap, text change, viewport resize).
+    const measure = () => {
+      const w = el.offsetWidth;
+      if (w > 0) {
+        setDim((prev) => (prev && prev.w === w ? prev : { w, path: buildWavyPath(w) }));
+      }
+    };
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.ready.then(measure).catch(() => {});
+    }
+    return () => ro.disconnect();
   }, [fixedWidth]);
 
   return (
